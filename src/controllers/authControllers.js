@@ -21,7 +21,16 @@ export async function signUp(req, res) {
 
 export async function signIn(req, res) {
   const token = generateToken(req.body);
+  const { email } = req.body;
   if (token) {
+
+    const {rows: userId} = await connection.query(`SELECT id FROM users WHERE email = $1`, [email])
+
+    await connection.query(
+      `INSERT INTO "sessions" ("userId", "token") VALUES ($1 , $2)`
+      ,[userId[0].id, token]
+    );
+
     return res.status(200).send(token);
   }
   res.sendStatus(500);
