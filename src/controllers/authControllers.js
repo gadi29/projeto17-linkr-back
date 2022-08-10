@@ -20,7 +20,8 @@ export async function signUp(req, res) {
 }
 
 export async function signIn(req, res) {
-  const token = generateToken(req.body);
+  const userId=res.locals.session
+  const token = generateToken(userId);
   if (token) {
     return res.status(200).send(token);
   }
