@@ -4,12 +4,17 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const { Pool } = pkg;
+const configDatabase = {
+  connectionString: process.env.DATABASE_URL
+}
 
-const connection = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+if(process.env.MODE === "PROD") {
+  configDatabase.ssl = {
+    rejectUnauthorized: false
+  }
+}
+
+const connection = new Pool(configDatabase);
 
 export default connection;
+
