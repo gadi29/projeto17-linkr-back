@@ -3,11 +3,12 @@ import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-export function generateToken(user, res) {
+export function generateToken(userId, res) {
   try {
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
-    return jwt.sign(user, jwtSecretKey, { expiresIn: "1d" });
-  } catch {
+    return jwt.sign({userId}, jwtSecretKey, { expiresIn: "1 d" });
+  } catch(error) {
+    console.log(error)
     return false;
   }
 }
@@ -17,7 +18,8 @@ export function validateToken(token) {
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
     jwt.verify(token, jwtSecretKey);
     return true;
-  } catch {
+  } catch(error) {
+    console.log(error)
     return false;
   }
 }
