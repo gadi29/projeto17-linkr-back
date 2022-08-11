@@ -1,7 +1,7 @@
 import joi from "joi";
 
 const postSchema = joi.object({
-    content: joi.string(),
+    postText: joi.string(),
     postUrl: joi.string().uri().pattern(/^https?:\/\//).required()
 });
 

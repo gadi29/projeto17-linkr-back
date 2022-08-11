@@ -1,9 +1,18 @@
 import connection from "../db/database.js";
+import urlMetadata from "url-metadata";
 
 
 async function getTimelinePosts () {
+    
     const { rows: timelinePosts } = await connection.query(`
-        SELECT u."name" AS "userName", u."userPhoto" AS "userPhoto", p."content", p."postUrl" 
+        SELECT 
+            u."name" AS "userName", 
+            u."userPhoto" AS "userPhoto", 
+            p."postText", 
+            p."postUrl", 
+            p."urlTitle", 
+            p."urlDescription",
+            p."urlImage" 
         FROM "posts" p
         JOIN "users" u ON p."userId" = u."id"
         ORDER BY p."createdAt" DESC
@@ -13,17 +22,27 @@ async function getTimelinePosts () {
     return timelinePosts;
 }
 
-async function createPost (userId, content, postUrl) {
+async function createPost (userId, postText, postUrl) {
 
-    await connection.query(`
-        INSERT INTO "posts" ("userId", "content", "postUrl") 
-        VALUES ($1, $2, $3)`,
-        [userId, content, postUrl]    
-    );
+    try {
+        const metadataObj = await urlMetadata(postUrl, {encode: 'UTF-8', descriptionLength: 500});
+        const urlTitle = metadataObj.title;
+        const urlDescription = metadataObj.description;
+        const urlImage = metadataObj.image;
 
-    const timelinePosts = await getTimelinePosts();
+        await connection.query(`
+            INSERT INTO "posts" ("userId", "postText", "postUrl", "urlTitle", "urlDescription", "urlImage") 
+            VALUES ($1, $2, $3, $4, $5, $6)`,
+            [userId, postText, postUrl, urlTitle, urlDescription, urlImage]    
+        );
 
-    return timelinePosts;
+        const timelinePosts = await getTimelinePosts();
+
+        return timelinePosts;
+
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 

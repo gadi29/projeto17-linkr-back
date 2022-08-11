@@ -33,6 +33,7 @@ async function validateUser (req, res, next) {
 
     try {
         const jwtData = jwt.verify(token, jwtKey);
+        console.log(jwtData);
         res.locals.session = jwtData;
         next();
    
