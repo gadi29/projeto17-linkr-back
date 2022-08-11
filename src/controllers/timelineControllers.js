@@ -22,8 +22,7 @@ export async function createPost(req, res) {
     try {
 
         const newPost = req.body;
-        //const userId = parseInt(res.locals.session.userId);
-        const userId = 1; //Substituir para a linha acima quando corrigir a geração do token JWT
+        const userId = parseInt(res.locals.session.userId);
 
         const timelinePosts = await timelineRepository.createPost(userId, newPost.postText, newPost.postUrl);
 
