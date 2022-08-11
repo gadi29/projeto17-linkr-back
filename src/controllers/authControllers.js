@@ -21,7 +21,7 @@ export async function signUp(req, res) {
 
 export async function signIn(req, res) {
   const userData = res.locals.session;
-  const token = generateToken(userId);
+  const token = generateToken(userData.id);
 
   if (token) {
     await connection.query(
