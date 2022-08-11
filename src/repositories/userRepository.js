@@ -21,6 +21,18 @@ function getUserPosts(userId) {
   );
 }
 
+function searchUser(search) {
+  const params = [`%${search}%`]
+
+  return connection.query(
+    `SELECT id, name, "userPhoto"
+    FROM users
+    WHERE users.name ILIKE $1`,
+    params
+  );
+}
+
 export const userRepository = {
-  getUserPosts
+  getUserPosts,
+  searchUser
 }

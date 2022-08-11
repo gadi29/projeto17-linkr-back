@@ -20,8 +20,16 @@ export async function signUp(req, res) {
 }
 
 export async function signIn(req, res) {
-  const token = generateToken(req.body);
+  const userId=res.locals.session
+  const token = generateToken(userId);
+
   if (token) {
+
+    await connection.query(
+      `INSERT INTO "sessions" ("userId", "token") VALUES ($1 , $2)`
+      ,[res.locals.session, token]
+    );
+
     return res.status(200).send(token);
   }
   res.sendStatus(500);

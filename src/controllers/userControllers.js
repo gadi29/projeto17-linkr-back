@@ -11,3 +11,15 @@ export async function getUserPage (req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function searchUsers(req, res) {
+  const search = req.query.user;
+
+  try {
+    const { rows: users } = await userRepository.searchUser(search);
+    res.status(200).send(users);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+}

@@ -38,7 +38,9 @@ export async function signInMiddlewareValidation(req, res, next) {
     if (!bcrypt.compareSync(req.body.password, register[0].password)) {
       return res.sendStatus(401);
     }
-  } catch {
+    res.locals.session=register[0].id
+  } catch(error) {
+    console.log(error)
     return res.sendStatus(500);
   }
   next();
