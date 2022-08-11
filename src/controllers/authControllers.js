@@ -29,6 +29,7 @@ export async function signIn(req, res) {
       [userData.id, token]
     );
     let userDataObj = {
+      userId:userData.id,
       name: userData.name,
       token: token,
       userPhoto: userData.userPhoto,
