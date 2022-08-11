@@ -6,7 +6,9 @@ async function getTimelinePosts () {
     
     const { rows: timelinePosts } = await connection.query(`
         SELECT 
-            u."name" AS "userName", 
+            p.id AS "postId",
+            u."name" AS "userName",
+            u."id" AS "userId",
             u."userPhoto" AS "userPhoto", 
             p."postText", 
             p."postUrl", 
