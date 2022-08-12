@@ -2,7 +2,7 @@ import connection from "../db/database.js";
 
 function getUser(userId) {
   return connection.query(
-    `SELECT "name", "userPhoto" FROM "users" WHERE "id" = $1`,
+    `SELECT "name" as "userName", "userPhoto" FROM "users" WHERE "id" = $1`,
     [userId]
   );
 }
