@@ -4,7 +4,13 @@ export async function getUserPage (req, res) {
   const { id } = req.params;
 
   try {
-    const { rows: userPosts } = await userRepository.getUserPosts(id);
+    const { rows: userPosts, rowCount } = await userRepository.getUserPosts(id);
+    
+    if(rowCount === 0) {
+      const { rows: user } = await userRepository.getUser(id);
+      return res.status(200).send(user);
+    }
+
     res.status(200).send([...userPosts]);
   } catch (error) {
     console.error(error);
