@@ -1,3 +1,4 @@
+import connection from "../db/database.js";
 import timelineRepository from "../repositories/timelineRepository.js"
 
 
@@ -34,4 +35,24 @@ export async function createPost(req, res) {
         return;
     }
 
+}
+
+
+export async function deletePost(req, res) {
+    const { id } = req.params;
+    const userId = parseInt(res.locals.session.userId);
+
+    try {
+        const { rowCount } = await timelineRepository.getUserPost(id, userId);
+        if (rowCount === 0) {
+            return res.sendStatus(401);
+        }
+
+        await timelineRepository.deletePost(id);
+        res.sendStatus(200);
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
 }
