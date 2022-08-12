@@ -1,5 +1,12 @@
 import connection from "../db/database.js";
 
+function getUser(userId) {
+  return connection.query(
+    `SELECT "name", "userPhoto" FROM "users" WHERE "id" = $1`,
+    [userId]
+  );
+}
+
 function getUserPosts(userId) {
   return connection.query(
     `SELECT 
@@ -33,6 +40,7 @@ function searchUser(search) {
 }
 
 export const userRepository = {
+  getUser,
   getUserPosts,
   searchUser
 }
