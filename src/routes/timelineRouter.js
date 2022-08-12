@@ -11,6 +11,7 @@ const timelineRouter = Router();
 
 timelineRouter.get("/timeline", validateUser, getTimelinePosts);
 timelineRouter.post("/timeline", validateUser, validateSchema(postSchema), createPost);
+timelineRouter.delete("/timeline/:id", validateUser, deletePost);
 
 
 export default timelineRouter;
