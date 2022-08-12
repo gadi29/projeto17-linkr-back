@@ -49,21 +49,28 @@ async function createPost (userId, postText, postUrl) {
 
 function getUserPost(postId, userId) {
     return connection.query(`
-        SELECT * FROM posts WHERE id = $1 AND "userId" = $2`,
+        SELECT * FROM "posts" WHERE id = $1 AND "userId" = $2`,
         [postId, userId]);
 }
 
 function deletePost(postId) {
     return connection.query(`
-        DELETE FROM posts WHERE id = $1`,
+        DELETE FROM "posts" WHERE id = $1`,
         [postId]);
+}
+
+function editPost(newPostText, postId) {
+    return connection.query(`
+    UPDATE "posts" SET "postText"=$1 WHERE id=$2`,
+    [newPostText, postId]);
 }
 
 const timelineRepository = {
     getTimelinePosts,
     createPost,
     getUserPost,
-    deletePost
+    deletePost,
+    editPost
 }
 
 export default timelineRepository;

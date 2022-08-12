@@ -56,3 +56,23 @@ export async function deletePost(req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function editPost(req, res) {
+    const { id } = req.params;
+    const userId = parseInt(res.locals.session.userId);
+    const editedPost = req.body;
+
+    try {
+        const { rowCount } = await timelineRepository.getUserPost(id, userId);
+        if (rowCount === 0) {
+            return res.sendStatus(401);
+        }
+
+        await timelineRepository.editPost(editedPost.postText, id);
+        res.sendStatus(200);
+        
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+}
