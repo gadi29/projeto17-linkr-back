@@ -8,9 +8,9 @@ export async function getUserPage (req, res) {
     
     if(rowCount === 0) {
       const { rows: user } = await userRepository.getUser(id);
-      return res.status(200).send(user[0]);
+      return res.status(200).send(user);
     }
-    
+
     res.status(200).send([...userPosts]);
   } catch (error) {
     console.error(error);
