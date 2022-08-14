@@ -1,5 +1,6 @@
 import connection from "../db/database.js";
 import urlMetadata from "url-metadata";
+import findHashtags from "find-hashtags";
 
 
 async function getTimelinePosts () {
@@ -37,11 +38,49 @@ async function createPost (userId, postText, postUrl) {
         const urlDescription = metadataObj.description;
         const urlImage = metadataObj.image;
 
-        await connection.query(`
+        const { rows: postId } = await connection.query(`
             INSERT INTO "posts" ("userId", "postText", "postUrl", "urlTitle", "urlDescription", "urlImage") 
-            VALUES ($1, $2, $3, $4, $5, $6)`,
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING "id"`,
             [userId, postText, postUrl, urlTitle, urlDescription, urlImage]    
         );
+
+
+        const hashtagsList = findHashtags(postText);
+
+        for (let i = 0 ; i < hashtagsList.length ; i++) {
+            
+            const {rows: hashtagDB} = await connection.query(`
+                SELECT * FROM "hashtags" 
+                WHERE "hashtags"."name" = $1`, 
+                [hashtagsList[i]]
+            );
+
+            if (hashtagDB.length === 0) {
+                const {rows: hashtagId} = await connection.query(`
+                    INSERT INTO "hashtags" ("name")
+                    VALUES ($1)
+                    RETURNING "id"`, 
+                    [hashtagsList[i]]
+                );
+
+                await connection.query(`
+                    INSERT INTO "postHashtag" ("hashtagId", "postId")
+                    VALUES ($1, $2)`, 
+                    [hashtagId[0].id, postId[0].id]
+                );
+
+            } else {
+                
+                await connection.query(`
+                    INSERT INTO "postHashtag" ("hashtagId", "postId")
+                    VALUES ($1, $2)`, 
+                    [hashtagDB[0].id, postId[0].id]
+                );
+
+            }
+        }
+
 
         const timelinePosts = await getTimelinePosts();
 
