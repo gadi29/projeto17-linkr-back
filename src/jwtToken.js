@@ -13,13 +13,15 @@ export function generateToken(userId, res) {
   }
 }
 
-export function validateToken(token) {
+export function validateToken(req,res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace('Bearer ', '');
   try {
     let jwtSecretKey = process.env.JWT_SECRET_KEY;
     jwt.verify(token, jwtSecretKey);
-    return true;
+    return res.status(200).send(true);
   } catch(error) {
     console.log(error)
-    return false;
+    return res.sendStatus(500)
   }
 }
