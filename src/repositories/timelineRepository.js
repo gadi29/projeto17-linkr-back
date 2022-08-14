@@ -5,18 +5,22 @@ import urlMetadata from "url-metadata";
 async function getTimelinePosts () {
     
     const { rows: timelinePosts } = await connection.query(`
-        SELECT 
-            p.id AS "postId",
-            u."name" AS "userName",
-            u."id" AS "userId",
+        SELECT
+            p."id" AS "postId",
+            u."name" AS "userName", 
             u."userPhoto" AS "userPhoto", 
             p."postText", 
             p."postUrl", 
             p."urlTitle", 
             p."urlDescription",
-            p."urlImage" 
+            p."urlImage", 
+            COUNT(l."postId")::int AS "likesQty",
+            COALESCE(JSON_AGG(l."userId") FILTER (WHERE l."userId" IS NOT NULL), '[]'::json) AS "usersIdLiked",
+            COALESCE(JSON_AGG(l."userName") FILTER (WHERE l."userName" IS NOT NULL), '[]'::json) AS "usersNameLiked"
         FROM "posts" p
+        LEFT JOIN "likes" l ON p."id" = l."postId"
         JOIN "users" u ON p."userId" = u."id"
+        GROUP BY p."id", u."name", u."userPhoto"
         ORDER BY p."createdAt" DESC
         LIMIT 20`
     );
