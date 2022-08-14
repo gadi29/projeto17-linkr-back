@@ -21,7 +21,7 @@ async function getTimelinePosts () {
         FROM "posts" p
         LEFT JOIN "likes" l ON p."id" = l."postId"
         JOIN "users" u ON p."userId" = u."id"
-        GROUP BY p."id", u."name", u."userPhoto"
+        GROUP BY p."id", u."name", u."id", u."userPhoto"
         ORDER BY p."createdAt" DESC
         LIMIT 20`
     );
