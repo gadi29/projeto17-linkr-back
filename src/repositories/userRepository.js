@@ -9,25 +9,25 @@ function getUser(userId) {
 
 function getUserPosts(userId) {
   return connection.query(
-    `SELECT 
-      "users"."id" AS "userId",
-      "users"."name" AS "userName",
-      "users"."userPhoto" AS "userPhoto",
-      "posts".id AS "postId",
-      "posts"."postText",
-      "posts"."postUrl",
-      "posts"."urlTitle",
-      "posts"."urlDescription",
-      "posts"."urlImage"
-      COUNT("likes"."postId")::int AS "likesQty",
-      COALESCE(JSON_AGG("likes"."userId") FILTER (WHERE "likes"."userId" IS NOT NULL), '[]'::json) AS "usersIdLiked",
-      COALESCE(JSON_AGG("likes"."userName") FILTER (WHERE "likes"."userName" IS NOT NULL), '[]'::json) AS "usersNameLiked"
-    FROM "posts"
-    LEFT JOIN "likes" ON "posts"."id" = "likes"."postId"
-    JOIN "users" ON "posts"."userId" = "users"."id"
-    GROUP BY "posts"."id", "users"."name", "users"."id", "users"."userPhoto"
-    WHERE "posts"."userId" = $1
-    ORDER BY "posts"."createdAt" DESC
+    `SELECT
+      p."id" AS "postId",
+      u."name" AS "userName",
+      u."id" AS "userId", 
+      u."userPhoto" AS "userPhoto", 
+      p."postText", 
+      p."postUrl", 
+      p."urlTitle", 
+      p."urlDescription",
+      p."urlImage", 
+      COUNT(l."postId")::int AS "likesQty",
+      COALESCE(JSON_AGG(l."userId") FILTER (WHERE l."userId" IS NOT NULL), '[]'::json) AS "usersIdLiked",
+      COALESCE(JSON_AGG(l."userName") FILTER (WHERE l."userName" IS NOT NULL), '[]'::json) AS "usersNameLiked"
+    FROM "posts" p
+    LEFT JOIN "likes" l ON p."id" = l."postId"
+    JOIN "users" u ON p."userId" = u."id"
+    WHERE p."userId" = $1
+    GROUP BY p."id", u."name", u."id", u."userPhoto"
+    ORDER BY p."createdAt" DESC
     LIMIT 20`,
     [userId]
   );
