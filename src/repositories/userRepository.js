@@ -25,8 +25,8 @@ function getUserPosts(userId) {
     FROM "posts"
     LEFT JOIN "likes" ON "posts"."id" = "likes"."postId"
     JOIN "users" ON "posts"."userId" = "users"."id"
-    WHERE "posts"."userId" = $1
     GROUP BY "posts"."id", "users"."name", "users"."id", "users"."userPhoto"
+    WHERE "posts"."userId" = $1
     ORDER BY "posts"."createdAt" DESC
     LIMIT 20`,
     [userId]
