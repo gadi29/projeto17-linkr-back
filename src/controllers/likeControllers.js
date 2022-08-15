@@ -18,10 +18,10 @@ export async function createLike(req, res) {
 }
 
 export async function deleteLike(req, res) {
-  const { idUser, postid } = req.body;
+  const { userId, postId } = req.body;
   const { user } = res.locals;
   try {
-    const {rows: searchLike} = await connection.query(`select * from likes where "postId" = '${postid}' AND "userId" = '${idUser}'`)
+    const {rows: searchLike} = await connection.query(`select * from likes where "postId" = '${postId}' AND "userId" = '${userId}'`)
     
     const id = searchLike[0].id
     
