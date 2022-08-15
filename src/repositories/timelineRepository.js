@@ -97,6 +97,12 @@ function getUserPost(postId, userId) {
         [postId, userId]);
 }
 
+function deleteHashtagRegister(postId) {
+    return connection.query(
+        `DELETE FROM "postHashtag" WHERE "postId" = $1`,
+        [postId]);
+}
+
 function deletePost(postId) {
     return connection.query(`
         DELETE FROM "posts" WHERE id = $1`,
@@ -113,6 +119,7 @@ const timelineRepository = {
     getTimelinePosts,
     createPost,
     getUserPost,
+    deleteHashtagRegister,
     deletePost,
     editPost
 }
