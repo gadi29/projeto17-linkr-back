@@ -2,13 +2,30 @@ import { userRepository } from "../repositories/userRepository.js";
 
 export async function getUserPage (req, res) {
   const userId = parseInt(req.params.id);
+
+  try {
+    const { rows: userPosts, rowCount: userPostsQtd } = await userRepository.getUserPosts(userId);
+
+    if(userPostsQtd === 0) {
+      const { rows: user } = await userRepository.getUser(userId);
+      return res.status(200).send([...user]);
+    }
+
+    res.status(200).send([...userPosts]);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+}
+
+export async function isFollowingUser(req, res) {
+  const userId = parseInt(req.params.id);
   const mainUserId = parseInt(res.locals.session.userId);
   let followingUser;
 
   try {
-    const { rows: userPosts, rowCount: userPostsQtd } = await userRepository.getUserPosts(userId);
     const { rowCount: following } = await userRepository.isFollowingUser(mainUserId, userId);
-    
+
     if (mainUserId === userId) {
       followingUser = null;
     } else if (following === 0) {
@@ -17,12 +34,8 @@ export async function getUserPage (req, res) {
       followingUser = true;
     }
 
-    if(userPostsQtd === 0) {
-      const { rows: user } = await userRepository.getUser(userId);
-      return res.status(200).send([...user, {following: followingUser}]);
-    }
+    res.status(200).send({following: followingUser});
 
-    res.status(200).send([...userPosts, {following: followingUser}]);
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
