@@ -25,6 +25,13 @@ function followUser(mainUserId, followingUserId) {
   );
 }
 
+function unfollowUser(mainUserId, followingUserId) {
+  return connection.query(
+    `DELETE FROM "followers" WHERE "mainUserId" = $1 AND "followingUserId" = $2`,
+    [mainUserId, followingUserId]
+  );
+}
+
 function getUserPosts(userId) {
   return connection.query(
     `SELECT
@@ -66,6 +73,7 @@ export const userRepository = {
   getUser,
   isFollowingUser,
   followUser,
+  unfollowUser,
   getUserPosts,
   searchUser
 }

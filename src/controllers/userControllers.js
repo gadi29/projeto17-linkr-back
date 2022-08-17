@@ -49,7 +49,7 @@ export async function followUser(req, res) {
   try {
     await userRepository.followUser(mainUserId, userId);
     res.sendStatus(201);
-    
+
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
@@ -61,7 +61,8 @@ export async function unfollowUser(req, res) {
   const mainUserId = parseInt(res.locals.session.userId);
   
   try {
-
+    await userRepository.unfollowUser(mainUserId, userId);
+    res.sendStatus(200);
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
