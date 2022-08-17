@@ -71,9 +71,10 @@ export async function unfollowUser(req, res) {
 
 export async function searchUsers(req, res) {
   const search = req.query.user;
+  const mainUserId = parseInt(res.locals.session.userId);
 
   try {
-    const { rows: users } = await userRepository.searchUser(search);
+    const { rows: users } = await userRepository.searchUser(search, mainUserId);
     res.status(200).send(users);
   } catch (error) {
     console.error(error);
