@@ -1,17 +1,28 @@
 import { userRepository } from "../repositories/userRepository.js";
 
 export async function getUserPage (req, res) {
-  const { id } = req.params;
+  const userId = parseInt(req.params.id);
+  const mainUserId = parseInt(res.locals.session.userId);
+  let followingUser;
 
   try {
-    const { rows: userPosts, rowCount } = await userRepository.getUserPosts(id);
+    const { rows: userPosts, rowCount: userPostsQtd } = await userRepository.getUserPosts(userId);
+    const { rowCount: following } = await userRepository.isFollowingUser(mainUserId, userId);
     
-    if(rowCount === 0) {
-      const { rows: user } = await userRepository.getUser(id);
-      return res.status(200).send(user);
+    if (mainUserId === userId) {
+      followingUser = null;
+    } else if (following === 0) {
+      followingUser = false;
+    } else if (following === 1) {
+      followingUser = true;
     }
 
-    res.status(200).send([...userPosts]);
+    if(userPostsQtd === 0) {
+      const { rows: user } = await userRepository.getUser(userId);
+      return res.status(200).send([...user, {following: followingUser}]);
+    }
+
+    res.status(200).send([...userPosts, {following: followingUser}]);
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
