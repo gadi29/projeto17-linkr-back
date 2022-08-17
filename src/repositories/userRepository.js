@@ -17,6 +17,14 @@ function isFollowingUser(mainUserId, followingUserId) {
   );
 }
 
+function followUser(mainUserId, followingUserId) {
+  return connection.query(
+    `INSERT INTO "followers" ("mainUserId", "followingUserId")
+    VALUES ($1, $2)`,
+    [mainUserId, followingUserId]
+  );
+}
+
 function getUserPosts(userId) {
   return connection.query(
     `SELECT
@@ -57,6 +65,7 @@ function searchUser(search) {
 export const userRepository = {
   getUser,
   isFollowingUser,
+  followUser,
   getUserPosts,
   searchUser
 }

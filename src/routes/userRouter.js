@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { getUserPage, isFollowingUser, searchUsers } from "../controllers/userControllers.js";
+import {
+  getUserPage,
+  isFollowingUser,
+  followUser,
+  unfollowUser,
+  searchUsers 
+} from "../controllers/userControllers.js";
 import validateUser from "../middlewares/validateUser.js";
 
 const userRouter = Router();
