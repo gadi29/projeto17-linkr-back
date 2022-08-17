@@ -2,8 +2,18 @@ import connection from "../db/database.js";
 
 function getUser(userId) {
   return connection.query(
-    `SELECT "name" as "userName", "userPhoto" FROM "users" WHERE "id" = $1`,
+    `SELECT
+      "name" as "userName",
+      "userPhoto"
+    FROM "users" WHERE "id" = $1`,
     [userId]
+  );
+}
+
+function isFollowingUser(mainUserId, followingUserId) {
+  return connection.query(
+    `SELECT * FROM "followers" WHERE "mainUserId" = $1 AND "followingUserId" = $2`,
+    [mainUserId, followingUserId]
   );
 }
 
@@ -46,6 +56,7 @@ function searchUser(search) {
 
 export const userRepository = {
   getUser,
+  isFollowingUser,
   getUserPosts,
   searchUser
 }
