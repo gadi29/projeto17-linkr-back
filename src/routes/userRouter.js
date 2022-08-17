@@ -14,6 +14,6 @@ userRouter.get("/user/:id", getUserPage);
 userRouter.get("/user/following/:id", validateUser, isFollowingUser);
 userRouter.post("/user/follow/:id", validateUser, followUser);
 userRouter.delete("/user/unfollow/:id", validateUser, unfollowUser);
-userRouter.get("/user", searchUsers);
+userRouter.get("/user", validateUser, searchUsers);
 
 export default userRouter;

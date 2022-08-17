@@ -58,14 +58,15 @@ function getUserPosts(userId) {
   );
 }
 
-function searchUser(search) {
-  const params = [`%${search}%`]
+function searchUser(search, userId) {
+  const params = `%${search}%`;
 
   return connection.query(
-    `SELECT id, name, "userPhoto"
+    `SELECT "users".id, "users"."name", "users"."userPhoto", "followers".id as following
     FROM users
-    WHERE users.name ILIKE $1`,
-    params
+    LEFT JOIN "followers" ON "followers"."mainUserId" = $1 AND "followers"."followingUserId" = "users".id
+    WHERE users.name ILIKE $2`,
+    [userId, params]
   );
 }
 
