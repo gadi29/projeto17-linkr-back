@@ -62,10 +62,12 @@ function searchUser(search, userId) {
   const params = `%${search}%`;
 
   return connection.query(
-    `SELECT "users".id, "users"."name", "users"."userPhoto", "followers".id as following
+    `SELECT "users".id, "users"."name", "users"."userPhoto",
+    ("followers".id IS NOT NULL) as "following"
     FROM users
     LEFT JOIN "followers" ON "followers"."mainUserId" = $1 AND "followers"."followingUserId" = "users".id
-    WHERE users.name ILIKE $2`,
+    WHERE users.name ILIKE $2
+    ORDER BY "following" DESC, "users"."name"`,
     [userId, params]
   );
 }
