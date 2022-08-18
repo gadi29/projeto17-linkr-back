@@ -1,5 +1,5 @@
 import connection from "../db/database.js";
-import timelineRepository from "../repositories/timelineRepository.js"
+import timelineRepository from "../repositories/timelineRepository.js";
 
 
 export async function getTimelinePosts(req, res) {
