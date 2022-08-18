@@ -3,7 +3,7 @@ import urlMetadata from "url-metadata";
 import findHashtags from "find-hashtags";
 
 
-async function getTimelinePosts () {
+async function getTimelinePosts (userId) {
     
     const { rows: timelinePosts } = await connection.query(`
         SELECT
@@ -15,16 +15,46 @@ async function getTimelinePosts () {
             p."postUrl", 
             p."urlTitle", 
             p."urlDescription",
-            p."urlImage", 
-            COUNT(l."postId")::int AS "likesQty",
-            COALESCE(JSON_AGG(l."userId") FILTER (WHERE l."userId" IS NOT NULL), '[]'::json) AS "usersIdLiked",
-            COALESCE(JSON_AGG(l."userName") FILTER (WHERE l."userName" IS NOT NULL), '[]'::json) AS "usersNameLiked"
+            p."urlImage",
+            COALESCE((
+                SELECT JSON_AGG(ROW_TO_JSON(t))
+                FROM (
+                    SELECT l."userId", l."userName"
+                    FROM "likes" l
+                    WHERE p."id" = l."postId"
+                ) t
+            ), '[]'::json) AS "usersLiked",
+            COALESCE((
+                SELECT JSON_AGG(ROW_TO_JSON(t))
+                FROM (
+                    SELECT u."name" AS "userName", 
+                        u."id" AS "userId", 
+                        u."userPhoto" AS "userPhoto", 
+                        c."comment" AS "comment",
+                        CASE 
+                            WHEN EXISTS (SELECT *
+                                FROM "followers" f
+                                WHERE f."mainUserId" = $1 AND f."followingUserId" = u."id")
+                            THEN TRUE
+                            ELSE FALSE
+                        END	AS "isFollowing",
+                        CASE 
+                            WHEN (c."userId" = p."userId")
+                            THEN TRUE
+                            ELSE FALSE
+                        END	AS "isAuthor"
+                    FROM "comments" c 
+                    JOIN "users" u ON u."id" = c."userId"
+                    WHERE c."postId" = p."id"
+                ) t
+            ), '[]'::json) AS "postComments"
         FROM "posts" p
-        LEFT JOIN "likes" l ON p."id" = l."postId"
         JOIN "users" u ON p."userId" = u."id"
+        LEFT JOIN "comments" c ON c."postId" = p."id"
         GROUP BY p."id", u."name", u."id", u."userPhoto"
         ORDER BY p."createdAt" DESC
-        LIMIT 20`
+        LIMIT 20;
+        `, [userId]
     );
 
     return timelinePosts;
