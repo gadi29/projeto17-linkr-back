@@ -1,12 +1,14 @@
 import connection from "../db/database.js";
-import timelineRepository from "../repositories/timelineRepository.js"
+import timelineRepository from "../repositories/timelineRepository.js";
 
 
 export async function getTimelinePosts(req, res) {
  
+    const userId = parseInt(res.locals.session.userId);
+    
     try {
 
-        const timelinePosts = await timelineRepository.getTimelinePosts();
+        const timelinePosts = await timelineRepository.getTimelinePosts(userId);
         res.status(200).send(timelinePosts);
 
     } catch (error) {
