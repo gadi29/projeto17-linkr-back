@@ -3,7 +3,8 @@ import {
   getTimelinePosts,
   createPost,
   deletePost,
-  editPost
+  editPost,
+  repostPost
 } from "../controllers/timelineControllers.js";
 import { validateSchema } from "../middlewares/schemaValidator.js";
 import postSchema from "../schemas/postSchema.js";
@@ -17,5 +18,6 @@ timelineRouter.get("/timeline", validateUser, getTimelinePosts);
 timelineRouter.post("/timeline", validateUser, validateSchema(postSchema), createPost);
 timelineRouter.delete("/timeline/:id", validateUser, deletePost);
 timelineRouter.put("/timeline/:id", validateUser, validateSchema(postSchema), editPost);
+timelineRouter.post("/repost/:id", validateUser, repostPost)
 
 export default timelineRouter;
