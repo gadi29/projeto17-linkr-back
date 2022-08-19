@@ -18,6 +18,6 @@ timelineRouter.get("/timeline", validateUser, getTimelinePosts);
 timelineRouter.post("/timeline", validateUser, validateSchema(postSchema), createPost);
 timelineRouter.delete("/timeline/:id", validateUser, deletePost);
 timelineRouter.put("/timeline/:id", validateUser, validateSchema(postSchema), editPost);
-timelineRouter.post("/repost/:id", validateUser, repostPost)
+timelineRouter.post("/repost/:id", validateUser, repostPost);
 
 export default timelineRouter;
