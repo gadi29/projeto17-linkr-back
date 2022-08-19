@@ -45,11 +45,6 @@ export async function repostPost(req, res) {
     const userId = parseInt(res.locals.session.userId);
 
     try {
-        const { rowCount } = await timelineRepository.getUserPost(id, userId);
-        if (rowCount === 0) {
-            return res.sendStatus(401);
-        }
-        
         await timelineRepository.repostPost(id);
         res.sendStatus(200);
 

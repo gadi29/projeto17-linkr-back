@@ -10,6 +10,7 @@ async function validateUser (req, res, next) {
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer ', '');
     const jwtKey = process.env.JWT_SECRET_KEY;
+    console.log(authorization)
 
     if (!token) {
         res.status(401).send('Invalid header');
