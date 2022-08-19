@@ -56,7 +56,7 @@ async function getTimelinePosts(userId) {
     JOIN "posts" p ON p.id = tl."postId"
     JOIN "users" u ON p."userId" = u."id"
     LEFT JOIN "comments" c ON c."postId" = p."id"
-    WHERE f."followingUserId" = p."userId"
+    WHERE f."followingUserId" = p."userId" OR p."userId" = $1
     GROUP BY p."id", u."name", u."id", u."userPhoto", tl."id", tl."userId", tl."repost"
     ORDER BY "T_id" DESC;`,
     [userId]
