@@ -3,60 +3,58 @@ import urlMetadata from "url-metadata";
 import findHashtags from "find-hashtags";
 
 async function getTimelinePosts(userId) {
-  const { rows: timelinePosts } = await connection.query(
-    `
+  const { rows: timelinePosts } = await connection.query(`
     SELECT
-	tl."id" AS "T_id",
-	tl."userId" AS "T_userId",
-	tl."repost" AS "T_isRepost",
-	p."id" AS "postId",
-	u."name" AS "userName",
-	u."id" AS "userId", 
-	u."userPhoto" AS "userPhoto", 
-	p."postText", 
-	p."postUrl", 
-	p."urlTitle", 
-	p."urlDescription",
-	p."urlImage",
-	COALESCE((
-		SELECT JSON_AGG(ROW_TO_JSON(t))
-		FROM (
-			SELECT l."userId", l."userName"
-			FROM "likes" l
-			WHERE p."id" = l."postId"
-		) t
-	), '[]'::json) AS "usersLiked",
-	COALESCE((
-		SELECT JSON_AGG(ROW_TO_JSON(t))
-		FROM (
-			SELECT u."name" AS "userName", 
-				u."id" AS "userId", 
-				u."userPhoto" AS "userPhoto", 
-				c."comment" AS "comment",
-				CASE 
-					WHEN EXISTS (SELECT *
-						FROM "followers" f
-						WHERE f."mainUserId" = $1 AND f."followingUserId" = u."id")
-					THEN TRUE
-					ELSE FALSE
-				END	AS "isFollowing",
-				CASE 
-					WHEN (c."userId" = p."userId")
-					THEN TRUE
-					ELSE FALSE
-				END	AS "isAuthor"
-			FROM "comments" c 
-			JOIN "users" u ON u."id" = c."userId"
-			WHERE c."postId" = p."id"
-		) t
-	), '[]'::json) AS "postComments"
+      tl."id" AS "T_id",
+      tl."userId" AS "T_userId",
+      tl."repost" AS "T_isRepost",
+      p."id" AS "postId",
+      u."name" AS "userName",
+      u."id" AS "userId", 
+      u."userPhoto" AS "userPhoto", 
+      p."postText", 
+      p."postUrl", 
+      p."urlTitle", 
+      p."urlDescription",
+      p."urlImage",
+    COALESCE((
+      SELECT JSON_AGG(ROW_TO_JSON(t))
+      FROM (
+        SELECT l."userId", l."userName"
+        FROM "likes" l
+        WHERE p."id" = l."postId"
+      ) t
+    ), '[]'::json) AS "usersLiked",
+    COALESCE((
+      SELECT JSON_AGG(ROW_TO_JSON(t))
+      FROM (
+        SELECT u."name" AS "userName", 
+          u."id" AS "userId", 
+          u."userPhoto" AS "userPhoto", 
+          c."comment" AS "comment",
+          CASE 
+            WHEN EXISTS (SELECT *
+              FROM "followers" f
+              WHERE f."mainUserId" = $1 AND f."followingUserId" = u."id")
+            THEN TRUE
+            ELSE FALSE
+          END	AS "isFollowing",
+          CASE 
+            WHEN (c."userId" = p."userId")
+            THEN TRUE
+            ELSE FALSE
+          END	AS "isAuthor"
+        FROM "comments" c 
+        JOIN "users" u ON u."id" = c."userId"
+        WHERE c."postId" = p."id"
+      ) t
+    ), '[]'::json) AS "postComments"
     FROM "timeline" tl
     JOIN "posts" p ON p.id = tl."postId"
     JOIN "users" u ON p."userId" = u."id"
     LEFT JOIN "comments" c ON c."postId" = p."id"
     GROUP BY p."id", u."name", u."id", u."userPhoto", tl."id", tl."userId", tl."repost"
-    ORDER BY "T_id" DESC;
-        `,
+    ORDER BY "T_id" DESC;`,
     [userId]
   );
 
@@ -74,12 +72,17 @@ async function createPost(userId, postText, postUrl) {
     const urlImage = metadataObj.image;
 
     const { rows: postId } = await connection.query(
-      `
-            INSERT INTO "posts" ("userId", "postText", "postUrl", "urlTitle", "urlDescription", "urlImage") 
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING "id"`,
+      `INSERT INTO "posts" ("userId", "postText", "postUrl", "urlTitle", "urlDescription", "urlImage") 
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING "id"`,
       [userId, postText, postUrl, urlTitle, urlDescription, urlImage]
     );
+
+    await connection.query(`
+      INSERT INTO "timeline" ("userId", "postId", "repost")
+      VALUES ($1, $2, $3)`,
+      [userId, postId[0].id, false]
+    )
 
     const hashtagsList = findHashtags(postText);
 
@@ -116,12 +119,6 @@ async function createPost(userId, postText, postUrl) {
       }
     }
 
-    await connection.query(
-      `
-            INSERT INTO "timeline" ("userId", "postId")
-            VALUES ($1, $2)`,
-      [userId, postId[0].id]
-    );
     const timelinePosts = await getTimelinePosts();
 
     return timelinePosts;

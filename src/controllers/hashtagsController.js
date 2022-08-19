@@ -20,10 +20,11 @@ export async function getTrending(req, res) {
 export async function getHashtagPosts(req, res) {
 
     const hashtag = req.params.hashtag;
+    const userId = parseInt(res.locals.session.userId);
 
     try {
 
-        const hashtagPosts = await hashtagsRepository.getHashtagPosts(hashtag);
+        const hashtagPosts = await hashtagsRepository.getHashtagPosts(userId, hashtag);
         res.status(200).send(hashtagPosts);
 
     } catch (error) {
