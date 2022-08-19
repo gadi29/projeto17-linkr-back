@@ -50,9 +50,11 @@ async function getTimelinePosts(userId) {
       ) t
     ), '[]'::json) AS "postComments"
     FROM "timeline" tl
+    JOIN "followers" f ON f."mainUserId" = $1
     JOIN "posts" p ON p.id = tl."postId"
     JOIN "users" u ON p."userId" = u."id"
     LEFT JOIN "comments" c ON c."postId" = p."id"
+    WHERE f."followingUserId" = p."userId"
     GROUP BY p."id", u."name", u."id", u."userPhoto", tl."id", tl."userId", tl."repost"
     ORDER BY "T_id" DESC;`,
     [userId]
