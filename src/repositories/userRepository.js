@@ -33,8 +33,11 @@ function unfollowUser(mainUserId, followingUserId) {
 }
 
 function getUserPosts(userId) {
-  return connection.query(
-    `SELECT
+  return connection.query(`
+    SELECT
+      tl."id" AS "T_id",
+      tl."userId" AS "T_userId",
+      tl."repost" AS "T_isRepost",
       p."id" AS "postId",
       u."name" AS "userName",
       u."id" AS "userId", 
@@ -43,17 +46,46 @@ function getUserPosts(userId) {
       p."postUrl", 
       p."urlTitle", 
       p."urlDescription",
-      p."urlImage", 
-      COUNT(l."postId")::int AS "likesQty",
-      COALESCE(JSON_AGG(l."userId") FILTER (WHERE l."userId" IS NOT NULL), '[]'::json) AS "usersIdLiked",
-      COALESCE(JSON_AGG(l."userName") FILTER (WHERE l."userName" IS NOT NULL), '[]'::json) AS "usersNameLiked"
-    FROM "posts" p
-    LEFT JOIN "likes" l ON p."id" = l."postId"
-    JOIN "users" u ON p."userId" = u."id"
-    WHERE p."userId" = $1
-    GROUP BY p."id", u."name", u."id", u."userPhoto"
-    ORDER BY p."createdAt" DESC
-    LIMIT 20`,
+      p."urlImage",
+    COALESCE((
+      SELECT JSON_AGG(ROW_TO_JSON(t))
+      FROM (
+        SELECT l."userId", l."userName"
+        FROM "likes" l
+        WHERE p."id" = l."postId"
+      ) t
+    ), '[]'::json) AS "usersLiked",
+    COALESCE((
+      SELECT JSON_AGG(ROW_TO_JSON(t))
+      FROM (
+        SELECT u."name" AS "userName", 
+          u."id" AS "userId", 
+          u."userPhoto" AS "userPhoto", 
+          c."comment" AS "comment",
+          CASE 
+            WHEN EXISTS (SELECT *
+              FROM "followers" f
+              WHERE f."mainUserId" = $1 AND f."followingUserId" = u."id")
+            THEN TRUE
+            ELSE FALSE
+          END	AS "isFollowing",
+          CASE 
+            WHEN (c."userId" = p."userId")
+            THEN TRUE
+            ELSE FALSE
+          END	AS "isAuthor"
+        FROM "comments" c 
+        JOIN "users" u ON u."id" = c."userId"
+        WHERE c."postId" = p."id"
+      ) t
+    ), '[]'::json) AS "postComments"
+      FROM "timeline" tl
+      JOIN "posts" p ON p.id = tl."postId"
+      JOIN "users" u ON p."userId" = u."id"
+      LEFT JOIN "comments" c ON c."postId" = p."id"
+      WHERE p."userId" = $1
+      GROUP BY p."id", u."name", u."id", u."userPhoto", tl."id", tl."userId", tl."repost"
+      ORDER BY "T_id" DESC`,
     [userId]
   );
 }
