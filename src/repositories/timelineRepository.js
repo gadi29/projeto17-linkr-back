@@ -147,18 +147,18 @@ function repostPost(postId, userId) {
   );
 }
 
-function deleteHashtagRegister(postId) {
-  return connection.query(`DELETE FROM "postHashtag" WHERE "postId" = $1`, [
-    postId,
-  ]);
-}
+async function deletePost(postId) {
+  await connection.query(`DELETE FROM "postHashtag" WHERE "postId" = $1`, 
+    [postId]);
 
-function deletePost(postId) {
-  return connection.query(
-    `
-        DELETE FROM "posts" WHERE id = $1`,
-    [postId]
-  );
+  await connection.query(`DELETE FROM "timeline" WHERE "postId" = $1`,
+    [postId]);
+
+  await connection.query(`DELETE FROM "likes" WHERE "postId" = $1`,
+    [postId]);
+
+  await connection.query(`DELETE FROM "posts" WHERE id = $1`,
+    [postId]);
 }
 
 function editPost(newPostText, postId) {
@@ -173,7 +173,6 @@ const timelineRepository = {
   getTimelinePosts,
   createPost,
   getUserPost,
-  deleteHashtagRegister,
   deletePost,
   editPost,
   repostPost,

@@ -69,7 +69,6 @@ export async function deletePost(req, res) {
             return res.sendStatus(401);
         }
 
-        await timelineRepository.deleteHashtagRegister(id);
         await timelineRepository.deletePost(id);
         res.sendStatus(200);
 
