@@ -45,7 +45,7 @@ export async function repostPost(req, res) {
     const userId = parseInt(res.locals.session.userId);
 
     try {
-        await timelineRepository.repostPost(id);
+        await timelineRepository.repostPost(id, userId);
         res.sendStatus(200);
 
     } catch (error) {
