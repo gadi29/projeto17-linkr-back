@@ -18,6 +18,19 @@ export async function getUserPage (req, res) {
   }
 }
 
+export async function getFollowingList (req, res) {
+  const mainUserId = parseInt(res.locals.session.userId);
+
+  try {
+    const { rows: followingList } = await userRepository.getFollowingUsers(mainUserId);
+
+    res.status(200).send([...followingList]);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+}
+
 export async function isFollowingUser(req, res) {
   const userId = parseInt(req.params.id);
   const mainUserId = parseInt(res.locals.session.userId);

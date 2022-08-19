@@ -10,6 +10,13 @@ function getUser(userId) {
   );
 }
 
+function getFollowingUsers(mainUserId) {
+  return connection.query(
+    `SELECT "followingUserId" FROM "followers" WHERE "mainUserId" = $1`,
+    [mainUserId]
+  );
+}
+
 function isFollowingUser(mainUserId, followingUserId) {
   return connection.query(
     `SELECT * FROM "followers" WHERE "mainUserId" = $1 AND "followingUserId" = $2`,
@@ -106,6 +113,7 @@ function searchUser(search, userId) {
 
 export const userRepository = {
   getUser,
+  getFollowingUsers,
   isFollowingUser,
   followUser,
   unfollowUser,
