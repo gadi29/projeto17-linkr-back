@@ -3,7 +3,8 @@ import urlMetadata from "url-metadata";
 import findHashtags from "find-hashtags";
 
 async function getTimelinePosts(userId) {
-  const { rows: timelinePosts } = await connection.query(`
+  const { rows: timelinePosts } = await connection.query(
+    `
     SELECT
       tl."id" AS "T_id",
       tl."userId" AS "T_userId",
@@ -25,6 +26,7 @@ async function getTimelinePosts(userId) {
         WHERE p."id" = l."postId"
       ) t
     ), '[]'::json) AS "usersLiked",
+    (SELECT COALESCE(COUNT(tl."postId"),0)::INT AS "repostCount" FROM "timeline" tl WHERE tl."postId" = p.id AND repost=true),
     COALESCE((
       SELECT JSON_AGG(ROW_TO_JSON(t))
       FROM (
@@ -78,11 +80,12 @@ async function createPost(userId, postText, postUrl) {
       [userId, postText, postUrl, urlTitle, urlDescription, urlImage]
     );
 
-    await connection.query(`
+    await connection.query(
+      `
       INSERT INTO "timeline" ("userId", "postId", "repost")
       VALUES ($1, $2, $3)`,
       [userId, postId[0].id, false]
-    )
+    );
 
     const hashtagsList = findHashtags(postText);
 
@@ -145,17 +148,17 @@ function repostPost(postId, userId) {
 }
 
 async function deletePost(postId) {
-  await connection.query(`DELETE FROM "postHashtag" WHERE "postId" = $1`, 
-    [postId]);
+  await connection.query(`DELETE FROM "postHashtag" WHERE "postId" = $1`, [
+    postId,
+  ]);
 
-  await connection.query(`DELETE FROM "timeline" WHERE "postId" = $1`,
-    [postId]);
+  await connection.query(`DELETE FROM "timeline" WHERE "postId" = $1`, [
+    postId,
+  ]);
 
-  await connection.query(`DELETE FROM "likes" WHERE "postId" = $1`,
-    [postId]);
+  await connection.query(`DELETE FROM "likes" WHERE "postId" = $1`, [postId]);
 
-  await connection.query(`DELETE FROM "posts" WHERE id = $1`,
-    [postId]);
+  await connection.query(`DELETE FROM "posts" WHERE id = $1`, [postId]);
 }
 
 function editPost(newPostText, postId) {
